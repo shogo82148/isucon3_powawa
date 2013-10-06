@@ -13,9 +13,9 @@ my $root_dir = File::Basename::dirname(__FILE__);
 my $app = Isucon3::Web->psgi($root_dir);
 builder {
     enable 'ReverseProxy';
-    enable 'Static',
-        path => qr!^/(?:(?:css|js|img)/|favicon\.ico$)!,
-        root => $root_dir . '/public';
+    #enable 'Static',
+    #    path => qr!^/(?:(?:css|js|img)/|favicon\.ico$)!,
+    #    root => $root_dir . '/public';
     enable 'Session',
         store => Plack::Session::Store::Cache->new(
             cache => Cache::Memcached::Fast->new({
