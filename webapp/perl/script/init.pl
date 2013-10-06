@@ -24,6 +24,7 @@ while (my $row = $memo_sth->fetchrow_hashref) {
     #print Dumper $row;
 }
 #print Dumper $users;
+$dbh->do("alter table memos add index user_idx (user ASC)");
 
 $dbh->commit;
 
