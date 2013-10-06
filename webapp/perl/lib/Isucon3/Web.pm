@@ -225,8 +225,9 @@ post '/memo' => [qw(session get_user require_user anti_csrf)] => sub {
     my ($self, $c) = @_;
 
     $self->dbh->query(
-        'INSERT INTO memos (user, content, is_private, created_at) VALUES (?, ?, ?, now())',
+        'INSERT INTO memos (user, username, content, is_private, created_at) VALUES (?, ?, ?, ?, now())',
         $c->stash->{user}->{id},
+        $c->stash->{user}->{username},
         scalar $c->req->param('content'),
         scalar($c->req->param('is_private')) ? 1 : 0,
     );
@@ -239,7 +240,7 @@ get '/memo/:id' => [qw(session get_user)] => sub {
 
     my $user = $c->stash->{user};
     my $memo = $self->dbh->select_row(
-        'SELECT id, user, content, is_private, created_at, updated_at FROM memos WHERE id=?',
+        'SELECT id, user, content, is_private, created_at, updated_at, username FROM memos WHERE id=?',
         $c->args->{id},
     );
     unless ($memo) {
@@ -251,10 +252,10 @@ get '/memo/:id' => [qw(session get_user)] => sub {
         }
     }
     $memo->{content_html} = markdown($memo->{content});
-    $memo->{username} = $self->dbh->select_one(
-        'SELECT username FROM users WHERE id=?',
-        $memo->{user},
-    );
+#    $memo->{username} = $self->dbh->select_one(
+#        'SELECT username FROM users WHERE id=?',
+#        $memo->{user},
+#    );
 
     my $cond;
     if ($user && $user->{id} == $memo->{user}) {
