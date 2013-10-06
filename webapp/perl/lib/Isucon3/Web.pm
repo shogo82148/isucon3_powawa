@@ -108,7 +108,7 @@ get '/' => [qw(session get_user)] => sub {
         'SELECT count(*) FROM memos WHERE is_private=0'
     );
     my $memos = $self->dbh->select_all(
-        'SELECT * FROM memos WHERE is_private=0 ORDER BY created_at DESC, id DESC LIMIT 100',
+        'SELECT * FROM memos WHERE is_private=0 ORDER BY id DESC LIMIT 100',
     );
 #    for my $memo (@$memos) {
 #        $memo->{username} = $self->dbh->select_one(
@@ -130,7 +130,7 @@ get '/recent/:page' => [qw(session get_user)] => sub {
         'SELECT count(*) FROM memos WHERE is_private=0'
     );
     my $memos = $self->dbh->select_all(
-        sprintf("SELECT * FROM memos WHERE is_private=0 ORDER BY created_at DESC, id DESC LIMIT 100 OFFSET %d", $page * 100)
+        sprintf("SELECT * FROM memos WHERE is_private=0 ORDER BY id DESC LIMIT 100 OFFSET %d", $page * 100)
     );
     if ( @$memos == 0 ) {
         return $c->halt(404);
@@ -215,7 +215,7 @@ get '/mypage' => [qw(session get_user require_user)] => sub {
     my ($self, $c) = @_;
 
     my $memos = $self->dbh->select_all(
-        'SELECT id, content, is_private, created_at, updated_at FROM memos WHERE user=? ORDER BY created_at DESC',
+        'SELECT id, content, is_private, created_at, updated_at FROM memos WHERE user=? ORDER BY id DESC',
         $c->stash->{user}->{id},
     );
     $c->render('mypage.tx', { memos => $memos });
@@ -266,7 +266,7 @@ get '/memo/:id' => [qw(session get_user)] => sub {
     }
 
     my $memos = $self->dbh->select_all(
-        "SELECT * FROM memos WHERE user=? $cond ORDER BY created_at",
+        "SELECT * FROM memos WHERE user=? $cond ORDER BY id",
         $memo->{user},
     );
     my ($newer, $older);
