@@ -136,12 +136,12 @@ get '/recent/:page' => [qw(session get_user)] => sub {
         return $c->halt(404);
     }
 
-    for my $memo (@$memos) {
-        $memo->{username} = $self->dbh->select_one(
-            'SELECT username FROM users WHERE id=?',
-            $memo->{user},
-        );
-    }
+#    for my $memo (@$memos) {
+#        $memo->{username} = $self->dbh->select_one(
+#            'SELECT username FROM users WHERE id=?',
+#            $memo->{user},
+#        );
+#    }
     $c->render('index.tx', {
         memos => $memos,
         page  => $page,
