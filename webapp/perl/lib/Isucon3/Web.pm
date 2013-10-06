@@ -12,6 +12,8 @@ use File::Temp qw/ tempfile /;
 use IO::Handle;
 use Encode;
 use Time::Piece;
+use Redis;
+use Data::MessagePack;
 
 sub load_config {
     my $self = shift;
@@ -48,6 +50,25 @@ sub dbh {
             },
         );
     };
+}
+
+sub redis {
+    my ($self) = @_;
+    $self->{_redis} ||= do {
+        Redis->new( encoding  => undef, );
+    };
+}
+
+sub mp {
+    my ($self) = @_;
+    $self->{_mp} ||= do {
+        Data::MessagePack->new();
+    };
+}
+
+sub public_count {
+    my ($self) = @_;
+    return $self->redis->get('memo:public:count');
 }
 
 filter 'session' => sub {
@@ -103,21 +124,14 @@ filter 'anti_csrf' => sub {
 
 get '/' => [qw(session get_user)] => sub {
     my ($self, $c) = @_;
+    my $r = $self->redis;
+    my $mp = $self->mp;
 
-    my $total = $self->dbh->select_one(
-        'SELECT count(*) FROM memos WHERE is_private=0'
-    );
-    my $memos = $self->dbh->select_all(
-        'SELECT * FROM memos WHERE is_private=0 ORDER BY id DESC LIMIT 100',
-    );
-#    for my $memo (@$memos) {
-#        $memo->{username} = $self->dbh->select_one(
-#            'SELECT username FROM users WHERE id=?',
-#            $memo->{user},
-#        );
-#    }
+    my $total = $self->public_count;
+    my @memos = map {$mp->unpack($_)} $r->sort('memo:public', 'BY', 'nosort', 'GET', 'memo:*', 'LIMIT', 0, 100);
+
     $c->render('index.tx', {
-        memos => $memos,
+        memos => \@memos,
         page  => 0,
         total => $total,
     });
@@ -126,24 +140,17 @@ get '/' => [qw(session get_user)] => sub {
 get '/recent/:page' => [qw(session get_user)] => sub {
     my ($self, $c) = @_;
     my $page  = int $c->args->{page};
-    my $total = $self->dbh->select_one(
-        'SELECT count(*) FROM memos WHERE is_private=0'
-    );
-    my $memos = $self->dbh->select_all(
-        sprintf("SELECT * FROM memos WHERE is_private=0 ORDER BY id DESC LIMIT 100 OFFSET %d", $page * 100)
-    );
-    if ( @$memos == 0 ) {
+    my $total = $self->public_count;
+
+    my $r = $self->redis;
+    my $mp = $self->mp;
+    my @memos = map {$mp->unpack($_)} $r->sort('memo:public', 'BY', 'nosort', 'GET', 'memo:*', 'LIMIT', $page * 100, 100);
+    if ( @memos == 0 ) {
         return $c->halt(404);
     }
 
-#    for my $memo (@$memos) {
-#        $memo->{username} = $self->dbh->select_one(
-#            'SELECT username FROM users WHERE id=?',
-#            $memo->{user},
-#        );
-#    }
     $c->render('index.tx', {
-        memos => $memos,
+        memos => \@memos,
         page  => $page,
         total => $total,
     });
@@ -215,7 +222,7 @@ get '/mypage' => [qw(session get_user require_user)] => sub {
     my ($self, $c) = @_;
 
     my $memos = $self->dbh->select_all(
-        'SELECT id, content, is_private, created_at, updated_at FROM memos WHERE user=? ORDER BY id DESC',
+        'SELECT id, content, is_private, created_at, updated_at FROM memos WHERE user=? ORDER BY created_at DESC',
         $c->stash->{user}->{id},
     );
     $c->render('mypage.tx', { memos => $memos });
@@ -223,15 +230,35 @@ get '/mypage' => [qw(session get_user require_user)] => sub {
 
 post '/memo' => [qw(session get_user require_user anti_csrf)] => sub {
     my ($self, $c) = @_;
+    my $is_private = scalar($c->req->param('is_private')) ? 1 : 0;
+    $self->redis->incr('memo:public:count') unless $is_private;
+    my $memo_id = $self->redis->incr('memo:count');
+    my $redis = $self->redis;
 
     $self->dbh->query(
-        'INSERT INTO memos (user, username, content, is_private, created_at) VALUES (?, ?, ?, ?, now())',
+        'INSERT INTO memos (id, user, content, is_private, created_at) VALUES (?, ?, ?, ?, now())',
+        $memo_id,
         $c->stash->{user}->{id},
-        $c->stash->{user}->{username},
         scalar $c->req->param('content'),
-        scalar($c->req->param('is_private')) ? 1 : 0,
+        $is_private,
     );
-    my $memo_id = $self->dbh->last_insert_id;
+
+    my $memo = $self->dbh->select_row(
+        'SELECT id, user, content, is_private, created_at, updated_at FROM memos WHERE id=?',
+        $memo_id,
+    );
+    $memo->{username} = $c->stash->{user}->{username},
+    $redis->set(
+        sprintf('memo:%d', $memo_id),
+        $self->mp->pack($memo),
+        sub {},
+    );
+    $redis->lpush(
+        'memo:public',
+        $memo->{id},
+        sub {},
+    ) unless $memo->{is_private};
+    $redis->wait_all_responses;
     $c->redirect('/memo/' . $memo_id);
 };
 
@@ -239,10 +266,10 @@ get '/memo/:id' => [qw(session get_user)] => sub {
     my ($self, $c) = @_;
 
     my $user = $c->stash->{user};
-    my $memo = $self->dbh->select_row(
-        'SELECT id, user, content, is_private, created_at, updated_at, username FROM memos WHERE id=?',
-        $c->args->{id},
+    my $memo = $self->redis->get(
+        sprintf('memo:%d', $c->args->{id}),
     );
+    $memo = $self->mp->unpack($memo) if $memo;
     unless ($memo) {
         $c->halt(404);
     }
@@ -252,10 +279,6 @@ get '/memo/:id' => [qw(session get_user)] => sub {
         }
     }
     $memo->{content_html} = markdown($memo->{content});
-#    $memo->{username} = $self->dbh->select_one(
-#        'SELECT username FROM users WHERE id=?',
-#        $memo->{user},
-#    );
 
     my $cond;
     if ($user && $user->{id} == $memo->{user}) {
@@ -266,7 +289,7 @@ get '/memo/:id' => [qw(session get_user)] => sub {
     }
 
     my $memos = $self->dbh->select_all(
-        "SELECT * FROM memos WHERE user=? $cond ORDER BY id",
+        "SELECT * FROM memos WHERE user=? $cond ORDER BY created_at",
         $memo->{user},
     );
     my ($newer, $older);
