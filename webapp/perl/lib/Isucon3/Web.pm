@@ -80,10 +80,18 @@ filter 'get_user' => sub {
         my ($self, $c) = @_;
 
         my $user_id = $c->req->env->{"psgix.session"}->{user_id};
-        my $user = $self->dbh->select_row(
-            'SELECT * FROM users WHERE id=?',
-            $user_id,
-        );
+        my $user_cache;
+        $user_cache = $self->redis->get('user:' . $user_id) if $user_id;
+        my $user;
+        if($user_cache) {
+            $user = $self->mp->unpack($user_cache);
+        } else {
+            $user = $self->dbh->select_row(
+                'SELECT * FROM users WHERE id=?',
+                $user_id,
+            );
+            $self->redis->set('user:' . $user_id, $self->mp->pack($user)) if $user;
+        }
         $c->stash->{user} = $user;
         $c->res->header('Cache-Control', 'private') if $user;
         $app->($self, $c);
