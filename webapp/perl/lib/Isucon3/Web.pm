@@ -114,16 +114,36 @@ filter 'anti_csrf' => sub {
     };
 };
 
+sub get_recent {
+    my ($self, $c, $page) = @_;
+    my $r = $self->redis;
+    my $mp = $self->mp;
+
+    my $memos = $r->hget('recent', $page);
+    if($memos) {
+        return decode_utf8 $memos;
+    } else {
+        my @list_memos = map {$mp->unpack($_)} $r->sort('memo:public', 'BY', 'nosort', 'GET', 'memo:*', 'LIMIT', $page * 100, 100);
+        return unless(@list_memos);
+        $memos = $c->tx->render('memos.tx', {
+            c => $c,
+            stash => $c,
+            memos => \@list_memos,
+        });
+        $r->hset('recent', $page, encode_utf8 $memos);
+        return $memos;
+    }
+}
+
 get '/' => [qw(session get_user)] => sub {
     my ($self, $c) = @_;
     my $r = $self->redis;
     my $mp = $self->mp;
 
     my $total = $self->public_count;
-    my @memos = map {$mp->unpack($_)} $r->sort('memo:public', 'BY', 'nosort', 'GET', 'memo:*', 'LIMIT', 0, 100);
-
+    my $memos = $self->get_recent($c, 0);
     $c->render('index.tx', {
-        memos => \@memos,
+        memos => $memos,
         page  => 0,
         total => $total,
     });
@@ -136,13 +156,13 @@ get '/recent/:page' => [qw(session get_user)] => sub {
 
     my $r = $self->redis;
     my $mp = $self->mp;
-    my @memos = map {$mp->unpack($_)} $r->sort('memo:public', 'BY', 'nosort', 'GET', 'memo:*', 'LIMIT', $page * 100, 100);
-    if ( @memos == 0 ) {
+    my $memos = $self->get_recent($c, $page);
+    unless($memos) {
         return $c->halt(404);
     }
 
     $c->render('index.tx', {
-        memos => \@memos,
+        memos => $memos,
         page  => $page,
         total => $total,
     });
@@ -245,11 +265,14 @@ post '/memo' => [qw(session get_user require_user anti_csrf)] => sub {
         $self->mp->pack($memo),
         sub {},
     );
-    $redis->lpush(
-        'memo:public',
-        $memo->{id},
-        sub {},
-    ) unless $memo->{is_private};
+    unless($memo->{is_private}) {
+        $redis->lpush(
+            'memo:public',
+            $memo->{id},
+            sub {},
+        );
+        $redis->del('recent', sub{});
+    }
     $redis->set(
         sprintf('memo:%d:content', $memo_id),
         encode_utf8 markdown($memo->{content}),
