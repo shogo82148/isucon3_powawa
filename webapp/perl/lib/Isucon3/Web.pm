@@ -12,6 +12,7 @@ use File::Temp qw/ tempfile /;
 use IO::Handle;
 use Encode;
 use Time::Piece;
+use Redis;
 
 sub load_config {
     my $self = shift;
@@ -47,6 +48,13 @@ sub dbh {
                 mysql_auto_reconnect => 1,
             },
         );
+    };
+}
+
+sub redis {
+    my ($self) = @_;
+    $self->{_redis} ||= do {
+        Redis->new;
     };
 }
 
