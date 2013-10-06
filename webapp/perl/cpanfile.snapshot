@@ -268,6 +268,18 @@ DISTRIBUTIONS
       Module::Build 0.38
       Mouse 0.93
       perl 5.008001
+  Devel-KYTProf-0.05
+    pathname: O/ON/ONISHI/Devel-KYTProf-0.05.tar.gz
+    provides:
+      Devel::KYTProf 0.05
+      Devel::KYTProf::Logger::LTSV undef
+    requirements:
+      Class::Data::Inheritable 0
+      ExtUtils::MakeMaker 6.36
+      Term::ANSIColor 0
+      Test::More 0.94
+      Time::HiRes 0
+      UNIVERSAL::require 0
   Devel-StackTrace-1.30
     pathname: D/DR/DROLSKY/Devel-StackTrace-1.30.tar.gz
     provides:
@@ -879,6 +891,21 @@ DISTRIBUTIONS
       Try::Tiny 0
       URI 1.59
       parent 0
+  Plack-Middleware-Profiler-KYTProf-0.08
+    pathname: K/KI/KITANO/Plack-Middleware-Profiler-KYTProf-0.08.tar.gz
+    provides:
+      Plack::Middleware::Profiler::KYTProf 0.08
+      Plack::Middleware::Profiler::KYTProf::Profile::KVS undef
+      Plack::Middleware::Profiler::KYTProf::Profile::TemplateEngine undef
+    requirements:
+      Devel::KYTProf 0.04
+      ExtUtils::MakeMaker 6.36
+      Filter::Util::Call 0
+      Module::Load 0
+      Plack 0
+      Test::More 0.98
+      Test::Requires 0
+      parent 0
   Plack-Middleware-ReverseProxy-0.15
     pathname: M/MI/MIYAGAWA/Plack-Middleware-ReverseProxy-0.15.tar.gz
     provides:
@@ -1173,6 +1200,14 @@ DISTRIBUTIONS
       constant 0
       strict 0
       warnings 0
+  UNIVERSAL-require-0.15
+    pathname: N/NE/NEILB/UNIVERSAL-require-0.15.tar.gz
+    provides:
+      UNIVERSAL 0.15
+      UNIVERSAL::require 0.15
+    requirements:
+      ExtUtils::MakeMaker 0
+      Test::More 0.47
   URI-1.60
     pathname: G/GA/GAAS/URI-1.60.tar.gz
     provides:
