@@ -233,6 +233,7 @@ post '/memo' => [qw(session get_user require_user anti_csrf)] => sub {
     my $is_private = scalar($c->req->param('is_private')) ? 1 : 0;
     $self->redis->incr('memo:public:count') unless $is_private;
     my $memo_id = $self->redis->incr('memo:count');
+    my $redis = $self->redis;
 
     $self->dbh->query(
         'INSERT INTO memos (id, user, content, is_private, created_at) VALUES (?, ?, ?, ?, now())',
@@ -247,7 +248,7 @@ post '/memo' => [qw(session get_user require_user anti_csrf)] => sub {
         $memo_id,
     );
     $memo->{username} = $c->stash->{user}->{username},
-    $self->redis->set(
+    $redis->set(
         sprintf('memo:%d', $memo_id),
         $self->mp->pack($memo),
         sub {},

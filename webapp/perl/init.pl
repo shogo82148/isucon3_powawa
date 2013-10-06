@@ -55,3 +55,5 @@ for my $memo (@$memos) {
 }
 
 $redis->wait_all_responses;
+
+$dbh->do("alter table memos add index user_idx (user ASC)");
