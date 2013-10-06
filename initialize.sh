@@ -1,2 +1,3 @@
 #!/bin/sh
-/home/isucon/env.sh perl /home/isucon/webapp/perl/script/init.pl
+cd /home/isucon/webapp/perl
+/home/isucon/env.sh carton exec perl /home/isucon/webapp/perl/init.pl
