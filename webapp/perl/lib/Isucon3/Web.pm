@@ -125,19 +125,13 @@ filter 'anti_csrf' => sub {
 get '/' => [qw(session get_user)] => sub {
     my ($self, $c) = @_;
     my $r = $self->redis;
+    my $mp = $self->mp;
 
     my $total = $self->public_count;
-    my $memos = $self->dbh->select_all(
-        'SELECT * FROM memos WHERE is_private=0 ORDER BY created_at DESC, id DESC LIMIT 100',
-    );
-    for my $memo (@$memos) {
-        $memo->{username} = $self->dbh->select_one(
-            'SELECT username FROM users WHERE id=?',
-            $memo->{user},
-        );
-    }
+    my @memos = map {$mp->unpack($_)} $r->sort('memo:public', 'BY', 'nosort', 'GET', 'memo:*', 'LIMIT', 0, 100);
+
     $c->render('index.tx', {
-        memos => $memos,
+        memos => \@memos,
         page  => 0,
         total => $total,
     });
@@ -147,21 +141,16 @@ get '/recent/:page' => [qw(session get_user)] => sub {
     my ($self, $c) = @_;
     my $page  = int $c->args->{page};
     my $total = $self->public_count;
-    my $memos = $self->dbh->select_all(
-        sprintf("SELECT * FROM memos WHERE is_private=0 ORDER BY created_at DESC, id DESC LIMIT 100 OFFSET %d", $page * 100)
-    );
-    if ( @$memos == 0 ) {
+
+    my $r = $self->redis;
+    my $mp = $self->mp;
+    my @memos = map {$mp->unpack($_)} $r->sort('memo:public', 'BY', 'nosort', 'GET', 'memo:*', 'LIMIT', $page * 100, 100);
+    if ( @memos == 0 ) {
         return $c->halt(404);
     }
 
-    for my $memo (@$memos) {
-        $memo->{username} = $self->dbh->select_one(
-            'SELECT username FROM users WHERE id=?',
-            $memo->{user},
-        );
-    }
     $c->render('index.tx', {
-        memos => $memos,
+        memos => \@memos,
         page  => $page,
         total => $total,
     });
@@ -261,7 +250,14 @@ post '/memo' => [qw(session get_user require_user anti_csrf)] => sub {
     $self->redis->set(
         sprintf('memo:%d', $memo_id),
         $self->mp->pack($memo),
+        sub {},
     );
+    $redis->lpush(
+        'memo:public',
+        $memo->{id},
+        sub {},
+    ) unless $memo->{is_private};
+    $redis->wait_all_responses;
     $c->redirect('/memo/' . $memo_id);
 };
 

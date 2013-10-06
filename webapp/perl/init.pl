@@ -47,7 +47,7 @@ for my $memo (@$memos) {
         $mp->pack($memo),
         sub {},
     );
-    $redis->rpush(
+    $redis->lpush(
         'memo:public',
         $memo->{id},
         sub {},
