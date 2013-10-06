@@ -114,7 +114,7 @@ filter 'anti_csrf' => sub {
     };
 };
 
-get '/' => [qw(session get_user)] => sub {
+get '/' => sub {
     my ($self, $c) = @_;
     my $r = $self->redis;
     my $mp = $self->mp;
@@ -129,7 +129,7 @@ get '/' => [qw(session get_user)] => sub {
     });
 };
 
-get '/recent/:page' => [qw(session get_user)] => sub {
+get '/recent/:page' => sub {
     my ($self, $c) = @_;
     my $page  = int $c->args->{page};
     my $total = $self->public_count;
