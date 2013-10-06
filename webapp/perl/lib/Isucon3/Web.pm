@@ -14,6 +14,7 @@ use Encode;
 use Time::Piece;
 use Redis;
 use Data::MessagePack;
+use Text::Markdown::Discount qw/markdown/;
 
 sub load_config {
     my $self = shift;
@@ -24,16 +25,6 @@ sub load_config {
         close($fh);
         decode_json($json);
     };
-}
-
-sub markdown {
-    my $content = shift;
-    my ($fh, $filename) = tempfile();
-    $fh->print(encode_utf8($content));
-    $fh->close;
-    my $html = qx{ ../bin/markdown $filename };
-    unlink $filename;
-    return $html;
 }
 
 sub dbh {
