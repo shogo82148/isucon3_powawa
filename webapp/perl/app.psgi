@@ -16,6 +16,7 @@ builder {
     #enable 'Static',
     #    path => qr!^/(?:(?:css|js|img)/|favicon\.ico$)!,
     #    root => $root_dir . '/public';
+    enable 'Profiler::KYTProf';
     enable 'Session',
         store => Plack::Session::Store::Cache->new(
             cache => Cache::Memcached::Fast->new({

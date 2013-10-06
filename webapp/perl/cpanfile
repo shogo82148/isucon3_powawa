@@ -8,5 +8,6 @@ requires "Time::Piece";
 requires "DBD::mysql";
 #requires "Starman";
 requires "Starlet";
+requires "Plack::Middleware::Profiler::KYTProf";
 requires "Plack::Session";
 requires "Cache::Memcached::Fast";
