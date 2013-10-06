@@ -428,6 +428,21 @@ DISTRIBUTIONS
       Filesys::Notify::Simple 0.12
     requirements:
       ExtUtils::MakeMaker 6.30
+  FindBin-libs-1.8
+    pathname: L/LE/LEMBARK/FindBin-libs-1.8.tar.gz
+    provides:
+      FindBin::libs undef
+    requirements:
+      Carp 0
+      Cwd 0
+      File::Spec 0
+      File::Temp 0
+      FindBin 0
+      List::Util 0
+      Module::Build 0.4003
+      Symbol 0
+      Test::More 0
+      strict 0
   HTML-FillInForm-Lite-1.13
     pathname: G/GF/GFUJI/HTML-FillInForm-Lite-1.13.tar.gz
     provides:
@@ -595,6 +610,12 @@ DISTRIBUTIONS
       File::Temp 0
       Scalar::Util 0
       Test::More 0.88
+  IO-String-1.08
+    pathname: G/GA/GAAS/IO-String-1.08.tar.gz
+    provides:
+      IO::String 1.08
+    requirements:
+      ExtUtils::MakeMaker 0
   JSON-2.59
     pathname: M/MA/MAKAMAKA/JSON-2.59.tar.gz
     provides:
@@ -942,6 +963,20 @@ DISTRIBUTIONS
       Proc::Wait3 0.04
     requirements:
       ExtUtils::MakeMaker 0
+  Redis-1.961
+    pathname: M/ME/MELO/Redis-1.961.tar.gz
+    provides:
+      Redis 1.961
+      Redis::Hash 1.961
+      Redis::List 1.961
+    requirements:
+      Digest::SHA 0
+      IO::String 0
+      IPC::Cmd 0
+      Test::Deep 0
+      Test::Fatal 0
+      Test::More 0.98
+      Try::Tiny 0
   Router-Simple-0.15
     pathname: T/TO/TOKUHIROM/Router-Simple-0.15.tar.gz
     provides:
@@ -1079,6 +1114,18 @@ DISTRIBUTIONS
       Test::More 0
       Test::NoWarnings 0.02
       Test::Tester 0.04
+  Test-Fatal-0.013
+    pathname: R/RJ/RJBS/Test-Fatal-0.013.tar.gz
+    provides:
+      Test::Fatal 0.013
+    requirements:
+      Carp 0
+      Exporter 5.57
+      ExtUtils::MakeMaker 6.30
+      Test::Builder 0
+      Try::Tiny 0.07
+      strict 0
+      warnings 0
   Test-NoWarnings-1.04
     pathname: A/AD/ADAMK/Test-NoWarnings-1.04.tar.gz
     provides:

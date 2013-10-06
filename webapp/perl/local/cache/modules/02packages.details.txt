@@ -4,8 +4,8 @@ Description:  Package names found in cpanfile.snapshot
 Columns:      package name, version, path
 Intended-For: Automated fetch routines, namespace documentation.
 Written-By:   Carton v1.0.12
-Line-Count:   540
-Last-Updated: Sun Oct  6 14:13:56 2013
+Line-Count:   553
+Last-Updated: Sun Oct  6 14:39:31 2013
 
 Apache::LogFormat::Compiler            0.13  K/KA/KAZEBURO/Apache-LogFormat-Compiler-0.13.tar.gz
 Bundle::DBD::mysql                    4.004  C/CA/CAPTTOFU/DBD-mysql-4.024.tar.gz
@@ -135,6 +135,8 @@ Data::Validator::Role::NoRestricted      undef  G/GF/GFUJI/Data-Validator-1.03.t
 Data::Validator::Role::NoThrow        undef  G/GF/GFUJI/Data-Validator-1.03.tar.gz
 Data::Validator::Role::Sequenced      undef  G/GF/GFUJI/Data-Validator-1.03.tar.gz
 Data::Validator::Role::StrictSequenced      undef  G/GF/GFUJI/Data-Validator-1.03.tar.gz
+Devel::KYTProf                         0.05  O/ON/ONISHI/Devel-KYTProf-0.05.tar.gz
+Devel::KYTProf::Logger::LTSV          undef  O/ON/ONISHI/Devel-KYTProf-0.05.tar.gz
 Devel::StackTrace                      1.30  D/DR/DROLSKY/Devel-StackTrace-1.30.tar.gz
 Devel::StackTrace::AsHTML              0.14  M/MI/MIYAGAWA/Devel-StackTrace-AsHTML-0.14.tar.gz
 Devel::StackTrace::Frame               1.30  D/DR/DROLSKY/Devel-StackTrace-1.30.tar.gz
@@ -160,6 +162,7 @@ File::Listing::vms                     6.04  G/GA/GAAS/File-Listing-6.04.tar.gz
 File::ShareDir                         1.03  A/AD/ADAMK/File-ShareDir-1.03.tar.gz
 File::ShareDir::Install                0.05  G/GW/GWYN/File-ShareDir-Install-0.05.tar.gz
 Filesys::Notify::Simple                0.12  M/MI/MIYAGAWA/Filesys-Notify-Simple-0.12.tar.gz
+FindBin::libs                         undef  L/LE/LEMBARK/FindBin-libs-1.8.tar.gz
 HTML::Entities                         3.69  G/GA/GAAS/HTML-Parser-3.71.tar.gz
 HTML::FillInForm::Lite                 1.13  G/GF/GFUJI/HTML-FillInForm-Lite-1.13.tar.gz
 HTML::FillInForm::Lite::Compat         1.13  G/GF/GFUJI/HTML-FillInForm-Lite-1.13.tar.gz
@@ -201,6 +204,7 @@ HTTP::Status                           6.03  G/GA/GAAS/HTTP-Message-6.06.tar.gz
 HTTP::Tiny                            0.036  D/DA/DAGOLDEN/HTTP-Tiny-0.036.tar.gz
 Hash::MultiValue                       0.15  M/MI/MIYAGAWA/Hash-MultiValue-0.15.tar.gz
 IO::HTML                               1.00  C/CJ/CJM/IO-HTML-1.00.tar.gz
+IO::String                             1.08  G/GA/GAAS/IO-String-1.08.tar.gz
 JSON                                   2.59  M/MA/MAKAMAKA/JSON-2.59.tar.gz
 JSON::Backend::PP                      2.59  M/MA/MAKAMAKA/JSON-2.59.tar.gz
 JSON::Boolean                          2.59  M/MA/MAKAMAKA/JSON-2.59.tar.gz
@@ -352,6 +356,9 @@ Plack::Middleware::Lint               undef  M/MI/MIYAGAWA/Plack-1.0029.tar.gz
 Plack::Middleware::Log4perl           undef  M/MI/MIYAGAWA/Plack-1.0029.tar.gz
 Plack::Middleware::LogDispatch        undef  M/MI/MIYAGAWA/Plack-1.0029.tar.gz
 Plack::Middleware::NullLogger         undef  M/MI/MIYAGAWA/Plack-1.0029.tar.gz
+Plack::Middleware::Profiler::KYTProf       0.08  K/KI/KITANO/Plack-Middleware-Profiler-KYTProf-0.08.tar.gz
+Plack::Middleware::Profiler::KYTProf::Profile::KVS      undef  K/KI/KITANO/Plack-Middleware-Profiler-KYTProf-0.08.tar.gz
+Plack::Middleware::Profiler::KYTProf::Profile::TemplateEngine      undef  K/KI/KITANO/Plack-Middleware-Profiler-KYTProf-0.08.tar.gz
 Plack::Middleware::RearrangeHeaders      undef  M/MI/MIYAGAWA/Plack-1.0029.tar.gz
 Plack::Middleware::Recursive          undef  M/MI/MIYAGAWA/Plack-1.0029.tar.gz
 Plack::Middleware::Refresh            undef  M/MI/MIYAGAWA/Plack-1.0029.tar.gz
@@ -388,6 +395,9 @@ Plack::Util::Accessor                 undef  M/MI/MIYAGAWA/Plack-1.0029.tar.gz
 Plack::Util::IOWithPath               undef  M/MI/MIYAGAWA/Plack-1.0029.tar.gz
 Plack::Util::Prototype                undef  M/MI/MIYAGAWA/Plack-1.0029.tar.gz
 Proc::Wait3                            0.04  C/CT/CTILMES/Proc-Wait3-0.04.tar.gz
+Redis                                 1.961  M/ME/MELO/Redis-1.961.tar.gz
+Redis::Hash                           1.961  M/ME/MELO/Redis-1.961.tar.gz
+Redis::List                           1.961  M/ME/MELO/Redis-1.961.tar.gz
 Router::Simple                         0.15  T/TO/TOKUHIROM/Router-Simple-0.15.tar.gz
 Router::Simple::Declare               undef  T/TO/TOKUHIROM/Router-Simple-0.15.tar.gz
 Router::Simple::Route                 undef  T/TO/TOKUHIROM/Router-Simple-0.15.tar.gz
@@ -452,6 +462,7 @@ Test::Deep::SuperHash                 undef  R/RJ/RJBS/Test-Deep-0.110.tar.gz
 Test::Deep::SuperHashElements         undef  R/RJ/RJBS/Test-Deep-0.110.tar.gz
 Test::Deep::SuperHashKeys             undef  R/RJ/RJBS/Test-Deep-0.110.tar.gz
 Test::Deep::SuperHashKeysOnly         undef  R/RJ/RJBS/Test-Deep-0.110.tar.gz
+Test::Fatal                           0.013  R/RJ/RJBS/Test-Fatal-0.013.tar.gz
 Test::Mouse                           undef  G/GF/GFUJI/Mouse-1.12.tar.gz
 Test::NoWarnings                       1.04  A/AD/ADAMK/Test-NoWarnings-1.04.tar.gz
 Test::NoWarnings::Warning              1.04  A/AD/ADAMK/Test-NoWarnings-1.04.tar.gz
@@ -490,6 +501,8 @@ Text::Xslate::Syntax::TTerse          undef  G/GF/GFUJI/Text-Xslate-2.0009.tar.g
 Text::Xslate::Type::Raw               undef  G/GF/GFUJI/Text-Xslate-2.0009.tar.gz
 Text::Xslate::Util                    undef  G/GF/GFUJI/Text-Xslate-2.0009.tar.gz
 Try::Tiny                              0.18  D/DO/DOY/Try-Tiny-0.18.tar.gz
+UNIVERSAL                              0.15  N/NE/NEILB/UNIVERSAL-require-0.15.tar.gz
+UNIVERSAL::require                     0.15  N/NE/NEILB/UNIVERSAL-require-0.15.tar.gz
 URI                                    1.60  G/GA/GAAS/URI-1.60.tar.gz
 URI::Escape                            3.31  G/GA/GAAS/URI-1.60.tar.gz
 URI::Heuristic                         4.20  G/GA/GAAS/URI-1.60.tar.gz
