@@ -13,6 +13,7 @@ use IO::Handle;
 use Encode;
 use Time::Piece;
 use Redis;
+use Data::MessagePack;
 
 sub load_config {
     my $self = shift;
@@ -55,6 +56,13 @@ sub redis {
     my ($self) = @_;
     $self->{_redis} ||= do {
         Redis->new;
+    };
+}
+
+sub mp {
+    my ($self) = @_;
+    $self->{_mp} ||= do {
+        Data::MessagePack->new();
     };
 }
 

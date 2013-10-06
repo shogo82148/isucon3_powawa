@@ -9,3 +9,6 @@ requires "DBD::mysql";
 requires "Starman";
 requires "Plack::Session";
 requires "Cache::Memcached::Fast";
+requires "Plack";
+requires "FindBin::libs";
+requires "Redis";

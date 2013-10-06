@@ -1,4 +1,5 @@
 .*
 !.gitignore
 /local/
-
+/tmp/
+/webapp/perl/local/
