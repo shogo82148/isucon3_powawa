@@ -14,5 +14,5 @@ requires "Plack::Session";
 requires "Cache::Memcached::Fast";
 requires "Plack";
 requires "FindBin::libs";
-requires "Redis";
+requires '/home/isucon/webapp/perl/local/Redis-Fast';
 requires "Text::Markdown::Discount";

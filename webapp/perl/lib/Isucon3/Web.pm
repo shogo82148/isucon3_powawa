@@ -12,7 +12,7 @@ use File::Temp qw/ tempfile /;
 use IO::Handle;
 use Encode;
 use Time::Piece;
-use Redis;
+use Redis::Fast;
 use Data::MessagePack;
 use Text::Markdown::Discount qw/markdown/;
 use Encode;
@@ -47,7 +47,7 @@ sub dbh {
 sub redis {
     my ($self) = @_;
     $self->{_redis} ||= do {
-        Redis->new( encoding  => undef, );
+        Redis::Fast->new( encoding  => undef, );
     };
 }
 
