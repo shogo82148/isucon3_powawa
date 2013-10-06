@@ -10,6 +10,8 @@ use lib "$FindBin::Bin/extlib/lib/perl5";
 use lib "$FindBin::Bin/lib";
 
 use Isucon3::Web;
+use Text::Markdown::Discount qw/markdown/;
+use Encode;
 
 my $web = Isucon3::Web->new;
 my $dbh = $web->dbh;
@@ -52,6 +54,12 @@ for my $memo (@$memos) {
         $memo->{id},
         sub {},
     ) unless $memo->{is_private};
+
+    $redis->set(
+        sprintf('memo:%d:content', $memo->{id}),
+        encode_utf8 markdown($memo->{content}),
+        sub {},
+    );
 }
 
 $redis->wait_all_responses;

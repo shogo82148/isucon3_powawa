@@ -14,3 +14,4 @@ requires "Cache::Memcached::Fast";
 requires "Plack";
 requires "FindBin::libs";
 requires "Redis";
+requires "Text::Markdown::Discount";

@@ -14,6 +14,8 @@ use Encode;
 use Time::Piece;
 use Redis;
 use Data::MessagePack;
+use Text::Markdown::Discount qw/markdown/;
+use Encode;
 
 sub load_config {
     my $self = shift;
@@ -24,16 +26,6 @@ sub load_config {
         close($fh);
         decode_json($json);
     };
-}
-
-sub markdown {
-    my $content = shift;
-    my ($fh, $filename) = tempfile();
-    $fh->print(encode_utf8($content));
-    $fh->close;
-    my $html = qx{ ../bin/markdown $filename };
-    unlink $filename;
-    return $html;
 }
 
 sub dbh {
@@ -258,6 +250,11 @@ post '/memo' => [qw(session get_user require_user anti_csrf)] => sub {
         $memo->{id},
         sub {},
     ) unless $memo->{is_private};
+    $redis->set(
+        sprintf('memo:%d:content', $memo_id),
+        encode_utf8 markdown($memo->{content}),
+        sub {},
+    );
     $redis->wait_all_responses;
     $c->redirect('/memo/' . $memo_id);
 };
@@ -266,9 +263,22 @@ get '/memo/:id' => [qw(session get_user)] => sub {
     my ($self, $c) = @_;
 
     my $user = $c->stash->{user};
-    my $memo = $self->redis->get(
+    my $redis = $self->redis;
+    my ($memo, $content);
+    $redis->get(
         sprintf('memo:%d', $c->args->{id}),
+        sub {
+            $memo = shift;
+        },
     );
+    $redis->get(
+        sprintf('memo:%d:content', $c->args->{id}),
+        sub {
+            $content = decode_utf8 shift;
+        },
+    );
+    $redis->wait_all_responses;
+
     $memo = $self->mp->unpack($memo) if $memo;
     unless ($memo) {
         $c->halt(404);
@@ -278,7 +288,7 @@ get '/memo/:id' => [qw(session get_user)] => sub {
             $c->halt(404);
         }
     }
-    $memo->{content_html} = markdown($memo->{content});
+    $memo->{content_html} = $content;
 
     my $cond;
     if ($user && $user->{id} == $memo->{user}) {
