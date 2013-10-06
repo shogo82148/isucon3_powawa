@@ -55,7 +55,7 @@ sub dbh {
 sub redis {
     my ($self) = @_;
     $self->{_redis} ||= do {
-        Redis->new;
+        Redis->new( encoding  => undef, );
     };
 }
 
@@ -64,6 +64,11 @@ sub mp {
     $self->{_mp} ||= do {
         Data::MessagePack->new();
     };
+}
+
+sub public_count {
+    my ($self) = @_;
+    return $self->redis->get('memo:public:count');
 }
 
 filter 'session' => sub {
@@ -119,10 +124,9 @@ filter 'anti_csrf' => sub {
 
 get '/' => [qw(session get_user)] => sub {
     my ($self, $c) = @_;
+    my $r = $self->redis;
 
-    my $total = $self->dbh->select_one(
-        'SELECT count(*) FROM memos WHERE is_private=0'
-    );
+    my $total = $self->public_count;
     my $memos = $self->dbh->select_all(
         'SELECT * FROM memos WHERE is_private=0 ORDER BY created_at DESC, id DESC LIMIT 100',
     );
@@ -142,9 +146,7 @@ get '/' => [qw(session get_user)] => sub {
 get '/recent/:page' => [qw(session get_user)] => sub {
     my ($self, $c) = @_;
     my $page  = int $c->args->{page};
-    my $total = $self->dbh->select_one(
-        'SELECT count(*) FROM memos WHERE is_private=0'
-    );
+    my $total = $self->public_count;
     my $memos = $self->dbh->select_all(
         sprintf("SELECT * FROM memos WHERE is_private=0 ORDER BY created_at DESC, id DESC LIMIT 100 OFFSET %d", $page * 100)
     );
@@ -239,14 +241,27 @@ get '/mypage' => [qw(session get_user require_user)] => sub {
 
 post '/memo' => [qw(session get_user require_user anti_csrf)] => sub {
     my ($self, $c) = @_;
+    my $is_private = scalar($c->req->param('is_private')) ? 1 : 0;
+    $self->redis->incr('memo:public:count') unless $is_private;
+    my $memo_id = $self->redis->incr('memo:count');
 
     $self->dbh->query(
-        'INSERT INTO memos (user, content, is_private, created_at) VALUES (?, ?, ?, now())',
+        'INSERT INTO memos (id, user, content, is_private, created_at) VALUES (?, ?, ?, ?, now())',
+        $memo_id,
         $c->stash->{user}->{id},
         scalar $c->req->param('content'),
-        scalar($c->req->param('is_private')) ? 1 : 0,
+        $is_private,
     );
-    my $memo_id = $self->dbh->last_insert_id;
+
+    my $memo = $self->dbh->select_row(
+        'SELECT id, user, content, is_private, created_at, updated_at FROM memos WHERE id=?',
+        $memo_id,
+    );
+    $memo->{username} = $c->stash->{user}->{username},
+    $self->redis->set(
+        sprintf('memo:%d', $memo_id),
+        $self->mp->pack($memo),
+    );
     $c->redirect('/memo/' . $memo_id);
 };
 
@@ -254,10 +269,10 @@ get '/memo/:id' => [qw(session get_user)] => sub {
     my ($self, $c) = @_;
 
     my $user = $c->stash->{user};
-    my $memo = $self->dbh->select_row(
-        'SELECT id, user, content, is_private, created_at, updated_at FROM memos WHERE id=?',
-        $c->args->{id},
+    my $memo = $self->redis->get(
+        sprintf('memo:%d', $c->args->{id}),
     );
+    $memo = $self->mp->unpack($memo) if $memo;
     unless ($memo) {
         $c->halt(404);
     }
@@ -267,10 +282,6 @@ get '/memo/:id' => [qw(session get_user)] => sub {
         }
     }
     $memo->{content_html} = markdown($memo->{content});
-    $memo->{username} = $self->dbh->select_one(
-        'SELECT username FROM users WHERE id=?',
-        $memo->{user},
-    );
 
     my $cond;
     if ($user && $user->{id} == $memo->{user}) {
