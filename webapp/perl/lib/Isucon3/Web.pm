@@ -122,18 +122,18 @@ get '/recent/:page' => [qw(session get_user)] => sub {
         'SELECT count(*) FROM memos WHERE is_private=0'
     );
     my $memos = $self->dbh->select_all(
-        sprintf("SELECT * FROM memos WHERE is_private=0 ORDER BY created_at DESC, id DESC LIMIT 100 OFFSET %d", $page * 100)
+        sprintf(<<'__EOT__', $page * 100)
+SELECT memos.*
+     , users.username
+  FROM memos IGNORE INDEX (i_memos_3)
+  JOIN users ON memos.user = users.id
+ WHERE memos.is_private = 0
+ ORDER BY memos.created_at DESC
+        , memos.id DESC
+ LIMIT 100
+OFFSET %d
+__EOT__
     );
-    if ( @$memos == 0 ) {
-        return $c->halt(404);
-    }
-
-    for my $memo (@$memos) {
-        $memo->{username} = $self->dbh->select_one(
-            'SELECT username FROM users WHERE id=?',
-            $memo->{user},
-        );
-    }
     $c->render('index.tx', {
         memos => $memos,
         page  => $page,

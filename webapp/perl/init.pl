@@ -22,9 +22,11 @@ eval { $dbh->do("ALTER TABLE memos ADD content_html TEXT"); };
 my $memos = $dbh->select_all(
     'SELECT * FROM memos',
     );
+$dbh->do('BEGIN');
 for my $memo (@$memos) {
     my ($title) = split /\r?\n/, $memo->{content};
     my $content_html = markdown($memo->{content});
     $dbh->query('UPDATE memos SET title = ?, content_html = ? WHERE id = ?',
 	$title, $content_html, $memo->{id});
 }
+$dbh->do('COMMIT');
