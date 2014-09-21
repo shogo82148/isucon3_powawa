@@ -7,7 +7,7 @@ requires "Time::Piece";
 requires "Text::Markdown::Discount";
 
 requires "DBD::mysql";
-requires "Starman";
+requires "Starlet";
 requires "Plack::Session";
 requires "Cache::Memcached::Fast";
 requires "Plack::Middleware::AxsLog";

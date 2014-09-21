@@ -16,8 +16,13 @@
         chdir: /home/isucon/webapp/perl
       sudo: yes
 
-    - name: initialize
-      command: /home/isucon/initialize.sh
+    - name: copy supervisord.conf
+      copy: src=supervisord.conf dest=/etc/supervisord.conf owner=root group=root mode=0644
+      sudo: yes
+
+    - name: restart supervisord
+      service: name=supervisord state=reloaded enabled=yes
+      sudo: yes
 
     - name: restart isucon_perl
       supervisorctl: name=isucon_perl state=restarted
@@ -39,3 +44,9 @@
       service: name=nginx state=reloaded enabled=yes
       sudo: yes
 
+    - name: install tools
+      yum: name={{ item }} state=installed
+      sudo: yes
+      with_items:
+        - htop
+        - dstat
