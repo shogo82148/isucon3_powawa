@@ -19,7 +19,7 @@ builder {
     enable 'Session',
         store => Plack::Session::Store::Cache->new(
             cache => Cache::Memcached::Fast->new({
-                servers => [ "localhost:11211" ],
+                servers => [ "localhost:11212" ],
             }),
         ),
         state => Plack::Session::State::Cookie->new(
