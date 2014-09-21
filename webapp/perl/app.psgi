@@ -16,6 +16,11 @@ builder {
     enable 'Static',
         path => qr!^/(?:(?:css|js|img)/|favicon\.ico$)!,
         root => $root_dir . '/public';
+
+    enable 'AxsLog',
+      ltsv => 1,
+      response_time => 1;
+
     enable 'Session',
         store => Plack::Session::Store::Cache->new(
             cache => Cache::Memcached::Fast->new({

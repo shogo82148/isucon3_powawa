@@ -3,9 +3,12 @@
   remote_user: ec2-user
   tasks:
     - name: put files
-      synchronize: src=./ dest=/home/isucon recursive=yes
+      synchronize: src=./ dest=/home/isucon recursive=yes owner=yes
       sudo: yes
-      sudo_user: isucon
+
+    - name: change to owner
+      file: path=/home/isucon owner=isucon group=isucon recurse=yes
+      sudo: yes
 
     - name: carton install
       command: /home/isucon/env.sh carton install
@@ -13,10 +16,26 @@
         chdir: /home/isucon/webapp/perl
       sudo: yes
 
-    - name: initialize
-      command: /home/isucon/initialize.sh
-      sudo: yes
+     - name: initialize
+       command: /home/isucon/initialize.sh
 
     - name: restart isucon_perl
       supervisorctl: name=isucon_perl state=restarted
       sudo: yes
+
+    - name: stop httpd
+      service: name=httpd state=stopped enabled=no
+      sudo: yes
+
+    - name: copy nginx.conf
+      copy: src=nginx.conf dest=/etc/nginx/nginx.conf owner=root group=root mode=0644
+      sudo: yes
+
+    - name: start nginx
+      service: name=nginx state=started enabled=yes
+      sudo: yes
+
+    - name: reload nginx
+      service: name=nginx state=reloaded enabled=yes
+      sudo: yes
+
