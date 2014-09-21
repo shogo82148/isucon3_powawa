@@ -1,0 +1,18 @@
+---
+- hosts: isucon3
+  remote_user: ec2-user
+  tasks:
+    - name: put files
+      synchronize: src=./ dest=/home/isucon recursive=yes
+      sudo: yes
+      sudo_user: isucon
+
+    - name: carton install
+      command: /home/isucon/env.sh carton install
+      args:
+        chdir: /home/isucon/webapp/perl
+      sudo: yes
+
+    - name: restart isucon_perl
+      supervisorctl: name=isucon_perl state=restarted
+      sudo: yes
