@@ -16,8 +16,8 @@
         chdir: /home/isucon/webapp/perl
       sudo: yes
 
-     - name: initialize
-       command: /home/isucon/initialize.sh
+    - name: initialize
+      command: /home/isucon/initialize.sh
 
     - name: restart isucon_perl
       supervisorctl: name=isucon_perl state=restarted
