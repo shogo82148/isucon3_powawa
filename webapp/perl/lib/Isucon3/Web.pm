@@ -98,16 +98,20 @@ get '/' => [qw(session get_user)] => sub {
     my $total = $self->dbh->select_one(
         'SELECT count(*) FROM memos WHERE is_private=0'
     );
-    my $memos = $self->dbh->select_all(
-       'SELECT memos.*
-             , users.username
-          FROM memos IGNORE INDEX (i_memos_3)
-          JOIN users ON memos.user = users.id
-         WHERE memos.is_private = 0
-         ORDER BY memos.created_at DESC
-                , memos.id DESC
-         LIMIT 100'
-    );
+    my $memos = $self->dbh->select_all( <<'__EOT__' );
+SELECT memos.id
+     , memos.title
+     , memos.created_at
+     , users.username
+  FROM (SELECT id
+          FROM memos
+         WHERE is_private = 0
+         ORDER BY created_at DESC
+                , id DESC
+         LIMIT 100) AS t
+  JOIN memos on t.id = memos.id
+  JOIN users ON users.id = memos.user
+__EOT__
     $c->render('index.tx', {
         memos => $memos,
         page  => 0,
@@ -123,15 +127,19 @@ get '/recent/:page' => [qw(session get_user)] => sub {
     );
     my $memos = $self->dbh->select_all(
         sprintf(<<'__EOT__', $page * 100)
-SELECT memos.*
+SELECT memos.id
+     , memos.title
+     , memos.created_at
      , users.username
-  FROM memos IGNORE INDEX (i_memos_3)
-  JOIN users ON memos.user = users.id
- WHERE memos.is_private = 0
- ORDER BY memos.created_at DESC
-        , memos.id DESC
- LIMIT 100
-OFFSET %d
+  FROM (SELECT id
+          FROM memos
+         WHERE is_private = 0
+         ORDER BY created_at DESC
+                , id DESC
+         LIMIT 100
+        OFFSET %d) AS t
+  JOIN memos on t.id = memos.id
+  JOIN users ON users.id = memos.user
 __EOT__
     );
     $c->render('index.tx', {
@@ -261,7 +269,7 @@ get '/memo/:id' => [qw(session get_user)] => sub {
     }
 
     my $memos = $self->dbh->select_all(
-        "SELECT * FROM memos WHERE user=? $cond ORDER BY created_at",
+        "SELECT id FROM memos WHERE user=? $cond ORDER BY created_at",
         $memo->{user},
     );
     my ($newer, $older);
