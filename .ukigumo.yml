@@ -1,0 +1,2 @@
+install: ./deploy.sh
+script: ssh isucon3 sudo isucon3 benchmark --init /home/isucon/initialize.sh
