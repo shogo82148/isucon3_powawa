@@ -1,6 +1,6 @@
 #!/bin/bash
 set -u
-set -e
+#set -e
 umask 0077
 export PATH='/bin:/usr/bin'
 export LANG='C'
